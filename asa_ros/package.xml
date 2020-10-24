@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>asa_ros</name>
+  <version>0.0.0</version>
+  <description>ROS wrapper for the Azure Spatial Anchors Linux SDK.</description>
+
+  <maintainer email="helen.oleynikova@microsoft.com">Helen Oleynikova</maintainer>
+
+  <author email="helen.oleynikova@microsoft.com">Helen Oleynikova</author>
+
+  <license>See LICENSE file.</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin_simple</buildtool_depend>
+
+  <depend>cv_bridge</depend>
+  <depend>image_transport</depend>
+  <depend>rosbag</depend>
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_eigen</depend>
+  <depend>tf2_ros</depend>
+  <depend>cmake_modules</depend>
+
+  <depend>asa_ros_msgs</depend>
+</package>

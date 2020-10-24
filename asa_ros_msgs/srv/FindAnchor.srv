@@ -1,0 +1,6 @@
+# Azure Spatial Anchor ID (64-character UUID) to find. This anchor must be
+# created on the same Azure Spatial Anchors account as used in this ROS node.
+# Found anchors will be published on the /found_anchor topic.
+# Note that you can be searching for multiple anchors at once.
+string anchor_id
+---

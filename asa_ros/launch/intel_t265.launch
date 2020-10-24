@@ -1,0 +1,11 @@
+<launch>
+  <!-- See install instructions here: https://github.com/IntelRealSense/realsense-ros -->
+  <include file="$(find realsense2_camera)/launch/rs_t265.launch" >
+      <arg name="enable_fisheye1" value="true" />
+      <arg name="enable_fisheye2" value="true" />
+  </include>
+
+  <!-- See install instructions here: https://github.com/ethz-asl/image_undistort -->
+  <include file="$(find image_undistort)/launch/undistort_t265.launch" >
+  </include>
+</launch>
