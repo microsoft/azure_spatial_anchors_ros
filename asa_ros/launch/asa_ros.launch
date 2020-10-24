@@ -1,0 +1,33 @@
+<launch>
+  <!-- Account credentials for Azure Spatial Anchors account. -->
+  <arg name="account_id" default="" />
+  <arg name="account_key" default="" />
+  <arg name="account_domain" default="mixedreality.azure.com" />
+
+  <!-- ID of the anchor to search for on start-up. Can be comma-separated list. -->
+  <arg name="anchor_id" default="" />
+
+  <!-- Frame ID to use for found anchors. If set to blank, the UUID of the anchor will be used. -->
+  <arg name="anchor_frame_id" default="" />
+
+  <!-- Whether to print verbose status updated on every ingested frame. Very spammy. -->
+  <arg name="print_status" default="false" />
+
+  <node name="asa_ros" type="asa_ros_node" pkg="asa_ros" output="screen" clear_params="true">
+    <remap from="image" to="/camera/fisheye1_rect/image" />
+    <remap from="camera_info" to="/camera/fisheye1_rect/camera_info" />
+
+    <param name="world_frame_id" value="camera_odom_frame" />
+    <param name="camera_frame_id" value="camera_fisheye1_optical_frame" />
+
+    <param name="account_id" value="$(arg account_id)"/>
+    <param name="account_key" value="$(arg account_key)"/>
+    <param name="account_domain" value="$(arg account_domain)" />
+
+    <param name="anchor_frame_id" value="$(arg anchor_frame_id)" />
+
+    <param name="print_status" value="$(arg print_status)" />
+
+    <param name="anchor_id" value="$(arg anchor_id)" />
+  </node>
+</launch>
