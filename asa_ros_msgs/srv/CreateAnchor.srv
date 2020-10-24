@@ -1,0 +1,7 @@
+# Pose of the desired anchor expressed in the world frame.
+# If not set, will set it to identity (i.e., world frame) in a Z-up,
+# X-forward coordinate system (ROS canonical).
+geometry_msgs/TransformStamped anchor_in_world_frame
+---
+# Since anchor creation takes several seconds, the actual anchor ID, etc. will
+# be published on the /created_anchor topic.
