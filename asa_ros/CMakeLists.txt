@@ -33,11 +33,11 @@ add_library(${PROJECT_NAME}
   src/internal/asa_helper.cpp
 )
 target_link_libraries(${PROJECT_NAME}
-    AzureSpatialAnchors::AzureSpatialAnchors
-    Eigen3::Eigen
-    ${GLOG_LIBRARIES}
-    ${Gflags_LIBRARIES}
-    ${catkin_LIBRARIES}
+    PRIVATE AzureSpatialAnchors::AzureSpatialAnchors
+    PUBLIC Eigen3::Eigen
+    PUBLIC ${GLOG_LIBRARIES}
+    PUBLIC ${Gflags_LIBRARIES}
+    PUBLIC ${catkin_LIBRARIES}
 )
 
 ############
