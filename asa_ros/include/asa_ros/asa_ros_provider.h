@@ -14,14 +14,12 @@ class AsaRosProvider
  public:
   AsaRosProvider(size_t max_queue_size);
 
-  void* CreatePlatformAnchor(
-      const Microsoft::Azure::SpatialAnchors::Provider::Pose&
-          anchor_in_world_frame) override final;
+  virtual Microsoft::Azure::SpatialAnchors::Provider::ARAnchor*
+  CreateAnchor(const Microsoft::Azure::SpatialAnchors::Provider::Pose&
+                           anchor_in_world_frame) override final;
 
-  void ReleasePlatformAnchor(void* asa_ros_anchor) override final;
-
-  void GetPlatformAnchorToWorldPose(
-      const void* asa_ros_anchor,
+  virtual void GetAnchorToWorldPose(
+      const Microsoft::Azure::SpatialAnchors::Provider::ARAnchor& anchor,
       Microsoft::Azure::SpatialAnchors::Provider::Pose& anchor_in_world_frame)
       override final;
 
@@ -43,11 +41,12 @@ class AsaRosProvider
 // We have to have some kind of fake platform anchors just to fit the
 // convention. These are literally just arbitrary coordinate frames in
 // space.
-class AsaRosAnchor {
+class AsaRosAnchor
+    : public Microsoft::Azure::SpatialAnchors::Provider::ARAnchor {
  public:
   AsaRosAnchor(const Microsoft::Azure::SpatialAnchors::Provider::Pose&
                    anchor_in_world_frame)
-      : anchor_in_world_frame_(anchor_in_world_frame) {}
+      : ARAnchor(), anchor_in_world_frame_(anchor_in_world_frame) {}
 
   Microsoft::Azure::SpatialAnchors::Provider::Pose anchorInWorldFrame() const {
     return anchor_in_world_frame_;

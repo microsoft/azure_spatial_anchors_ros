@@ -70,7 +70,8 @@ AzureSpatialAnchorsInterface::AzureSpatialAnchorsInterface(
 
 void AzureSpatialAnchorsInterface::start() {
   // Create a session handle and session.
-  void* context_handle = reinterpret_cast<void*>(0x12345);
+  asa_session_handle context_handle =
+      reinterpret_cast<asa_session_handle>(0x12345);
   session_->Session(context_handle);
   session_->Start();
 
@@ -142,8 +143,8 @@ void AzureSpatialAnchorsInterface::addFrame(const uint64_t timestamp_ns,
 
   Eigen::Affine3d T_W_C_copy = T_W_C;
   if (config_.force_opengl_axes) {
-    // This rotates it to the z-backwards OpenGL convention, can be taken out
-    // later.
+    // This rotates it to the z-backwards OpenGL convention, hopefully no longer
+    // necessary.
     T_W_C_copy = T_W_C * (Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitY()) *
                           Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitZ()));
   }
@@ -154,8 +155,16 @@ void AzureSpatialAnchorsInterface::addFrame(const uint64_t timestamp_ns,
 
   frame.WorldToCameraPose(T_C_W_asa);
 
-  // Finally we process the frame.
-  session_->ProcessFrame(&frame);
+  try {
+    // Finally we process the frame.
+    session_->ProcessFrame(frame.GetHandle());
+  } catch (Microsoft::Azure::SpatialAnchors::runtime_error& e) {
+    LOG(ERROR) << "Couldn't add a frame: " << e.message();
+
+    LOG(ERROR) << "Type of camera: "
+               << reinterpret_cast<asap_frame*>(frame.GetHandle())->camera->type;
+    return;
+  }
 
   // Keep track.
   VLOG(3) << "Adding frame #" << frame_count_;
@@ -213,7 +222,7 @@ bool AzureSpatialAnchorsInterface::createAnchor(
 
   // Bind the Spatial (Cloud) anchor to the little local one (again just
   // stores the pose).
-  asa_anchor->LocalAnchor(ros_anchor.get());
+  asa_anchor->LocalAnchor(ros_anchor->GetHandle());
 
   asa::Status status;
   try {
@@ -263,7 +272,7 @@ bool AzureSpatialAnchorsInterface::createAnchorWithCallback(
 
   // Bind the Spatial (Cloud) anchor to the little local one (again just
   // stores the pose).
-  cloud_anchor_->LocalAnchor(local_anchor_);
+  cloud_anchor_->LocalAnchor(local_anchor_->GetHandle());
 
   asa::Status status;
   try {
@@ -358,8 +367,9 @@ bool AzureSpatialAnchorsInterface::queryAnchor(
 
   LOG(INFO) << "Found: " << found_anchors[0]->Identifier() << std::endl;
 
-  AsaRosAnchor* ros_anchor =
-      static_cast<AsaRosAnchor*>(found_anchors[0]->LocalAnchor());
+  AsaRosAnchor* ros_anchor = static_cast<AsaRosAnchor*>(
+      Microsoft::Azure::SpatialAnchors::Provider::ARAnchor::FromHandle(
+          found_anchors[0]->LocalAnchor()));
   asa::Provider::PoseRotationTranslationScale T_W_A_asa;
   T_W_A_asa = ros_anchor->anchorInWorldFrameRTS();
 
@@ -404,7 +414,8 @@ bool AzureSpatialAnchorsInterface::queryAnchorsWithCallback(
                        const std::shared_ptr<asa::AnchorLocatedEventArgs>&
                            anchor_located_event) {
         AsaRosAnchor* ros_anchor = static_cast<AsaRosAnchor*>(
-            anchor_located_event->Anchor()->LocalAnchor());
+            Microsoft::Azure::SpatialAnchors::Provider::ARAnchor::FromHandle(
+                anchor_located_event->Anchor()->LocalAnchor()));
 
         Eigen::Affine3d anchor_in_world_frame = Eigen::Affine3d::Identity();
         asaToEigenTransform(ros_anchor->anchorInWorldFrameRTS(),

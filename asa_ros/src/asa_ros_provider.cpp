@@ -8,25 +8,18 @@ namespace asa_ros {
 AsaRosProvider::AsaRosProvider(size_t max_queue_size)
     : max_queue_size_(max_queue_size), next_queue_id_(0) {}
 
-void* AsaRosProvider::CreatePlatformAnchor(
+Microsoft::Azure::SpatialAnchors::Provider::ARAnchor*
+AsaRosProvider::CreateAnchor(
     const Microsoft::Azure::SpatialAnchors::Provider::Pose&
         anchor_in_world_frame) {
   return new AsaRosAnchor(anchor_in_world_frame);
 }
 
-void AsaRosProvider::ReleasePlatformAnchor(void* asa_ros_anchor) {
-  delete static_cast<AsaRosAnchor*>(asa_ros_anchor);
-}
-
-void AsaRosProvider::GetPlatformAnchorToWorldPose(
-    const void* asa_ros_anchor,
+void AsaRosProvider::GetAnchorToWorldPose(
+    const Microsoft::Azure::SpatialAnchors::Provider::ARAnchor& anchor,
     Microsoft::Azure::SpatialAnchors::Provider::Pose& anchor_in_world_frame) {
-  if (asa_ros_anchor == nullptr) {
-    LOG(ERROR) << "Null anchor!";
-    return;
-  }
   anchor_in_world_frame =
-      static_cast<const AsaRosAnchor*>(asa_ros_anchor)->anchorInWorldFrame();
+      static_cast<const AsaRosAnchor&>(anchor).anchorInWorldFrame();
 }
 
 void AsaRosProvider::GetPixelData(const void* frame_context,
