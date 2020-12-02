@@ -31,7 +31,7 @@ void AsaRosProvider::GetPixelData(const void* frame_context,
   const auto iter = image_queue_.find(image_key);
   if (iter != image_queue_.end()) {
     const cv::Mat& image = iter->second;
-    size_t image_size = image.total() * image.elemSize();
+    size_t image_size = image.total() * image.elemSize() * image.channels();
     if (image_size != buffer_size) {
       LOG(ERROR) << "Image size and buffer size don't match! Image size: "
                  << image_size << " Buffer size: " << buffer_size;
