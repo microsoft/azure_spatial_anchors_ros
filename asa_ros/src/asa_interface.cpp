@@ -188,7 +188,7 @@ void AzureSpatialAnchorsInterface::addFrame(
   double cy = camera_msg.K[5];
 
   // Convert the image.
-  cv::Mat image = cv_bridge::toCvCopy(image_msg)->image;
+  cv::Mat image = cv_bridge::toCvCopy(image_msg, "mono8")->image;
 
   // Convert the pose.
   Eigen::Affine3d T_W_C = tf2::transformToEigen(T_W_C_msg);
