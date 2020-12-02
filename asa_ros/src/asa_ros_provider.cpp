@@ -31,7 +31,7 @@ void AsaRosProvider::GetPixelData(const void* frame_context,
   const auto iter = image_queue_.find(image_key);
   if (iter != image_queue_.end()) {
     const cv::Mat& image = iter->second;
-    size_t image_size = image.total() * image.elemSize() * image.channels();
+    size_t image_size = image.total() * image.elemSize();
     if (image_size != buffer_size) {
       LOG(ERROR) << "Image size and buffer size don't match! Image size: "
                  << image_size << " Buffer size: " << buffer_size;
@@ -45,7 +45,13 @@ void AsaRosProvider::GetPixelData(const void* frame_context,
 
 size_t AsaRosProvider::addImageToQueue(const cv::Mat& image) {
   std::unique_lock<std::mutex> provider_lock(provider_mutex_);
-  image_queue_[next_queue_id_] = image;
+  if (image.channels() > 1) {
+    cv::Mat gray_image;
+    cv::cvtColor(image, gray_image, cv::COLOR_RGB2GRAY);
+    image_queue_[next_queue_id_] = gray_image;
+  } else {
+    image_queue_[next_queue_id_] = image;
+  }
 
   VLOG(3) << "Added image " << next_queue_id_ << " to queue.\n";
 
