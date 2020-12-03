@@ -17,8 +17,12 @@
     <remap from="image" to="/camera/fisheye1_rect/image" />
     <remap from="camera_info" to="/camera/fisheye1_rect/camera_info" />
 
+    <!-- The frame ID of your world/odometry frame. Should be static relative to, well, the world. -->
     <param name="world_frame_id" value="camera_odom_frame" />
+    <!-- Optical frame of the camera, z facing "forward" (out of the camera frame). -->
     <param name="camera_frame_id" value="camera_fisheye1_optical_frame" />
+    <!-- Timeout to wait for TF lookups to finish. If you get a lot of TF errors but still smome valid lookups, try increasing this. -->
+    <param name="tf_lookup_timeout" value="0.1" />
 
     <param name="account_id" value="$(arg account_id)"/>
     <param name="account_key" value="$(arg account_key)"/>

@@ -12,10 +12,12 @@ AsaRosNode::AsaRosNode(const ros::NodeHandle& nh,
                        const ros::NodeHandle& nh_private)
     : nh_(nh),
       nh_private_(nh_private),
+      tf_buffer_(ros::Duration(120.0)),
       tf_listener_(tf_buffer_),
       world_frame_id_("world"),
       camera_frame_id_(""),
-      anchor_frame_id_("") {
+      anchor_frame_id_(""),
+      tf_lookup_timeout_(0.1) {
   initFromRosParams();
 }
 
@@ -56,6 +58,8 @@ void AsaRosNode::initFromRosParams() {
   nh_private_.param("world_frame_id", world_frame_id_, world_frame_id_);
   nh_private_.param("camera_frame_id", camera_frame_id_, camera_frame_id_);
   nh_private_.param("anchor_frame_id", anchor_frame_id_, anchor_frame_id_);
+  nh_private_.param("tf_lookup_timeout", tf_lookup_timeout_,
+                    tf_lookup_timeout_);
 
   // Load ASA config and set it up.
   AsaRosConfig asa_config;
@@ -100,7 +104,8 @@ void AsaRosNode::imageAndInfoCallback(
 
   // Look up its pose.
   if (tf_buffer_.canTransform(world_frame_id_, camera_frame_id_,
-                              image->header.stamp)) {
+                              image->header.stamp,
+                              ros::Duration(tf_lookup_timeout_))) {
     geometry_msgs::TransformStamped transform = tf_buffer_.lookupTransform(
         world_frame_id_, camera_frame_id_, image->header.stamp);
 
@@ -109,7 +114,9 @@ void AsaRosNode::imageAndInfoCallback(
     ROS_INFO_ONCE("Added first frame.");
   } else {
     ROS_WARN_STREAM("Couldn't look up transform from "
-                    << world_frame_id_ << " to " << camera_frame_id_);
+                    << world_frame_id_ << " to " << camera_frame_id_
+                    << " at timestamp " << image->header.stamp
+                    << " and ros::Time::now() " << ros::Time::now());
   }
 }
 

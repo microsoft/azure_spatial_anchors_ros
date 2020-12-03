@@ -45,7 +45,13 @@ void AsaRosProvider::GetPixelData(const void* frame_context,
 
 size_t AsaRosProvider::addImageToQueue(const cv::Mat& image) {
   std::unique_lock<std::mutex> provider_lock(provider_mutex_);
-  image_queue_[next_queue_id_] = image;
+  if (image.channels() > 1) {
+    cv::Mat gray_image;
+    cv::cvtColor(image, gray_image, cv::COLOR_BGR2GRAY);
+    image_queue_[next_queue_id_] = gray_image;
+  } else {
+    image_queue_[next_queue_id_] = image;
+  }
 
   VLOG(3) << "Added image " << next_queue_id_ << " to queue.\n";
 

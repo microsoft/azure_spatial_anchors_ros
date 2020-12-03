@@ -97,6 +97,10 @@ class AsaRosNode {
   std::string camera_frame_id_;
   std::string anchor_frame_id_;
 
+  // Timeout to wait for TF messages, in seconds. 0.0 = instantaneous. 1.0 =
+  // will wait a full second on any failed attempt.
+  double tf_lookup_timeout_;
+
   // Cache of which anchors are currently being queried. This will be only used
   // when reset() (but not resetCompletely() is called, to restart any
   // previous watchers.
