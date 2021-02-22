@@ -27,7 +27,7 @@
 namespace asa_ros {
 
 
-  typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,
+typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,
                                             sensor_msgs::CameraInfo> CameraSyncPolicy;
 
 
@@ -78,11 +78,9 @@ class AsaRosNode {
   std::unique_ptr<message_filters::Synchronizer<CameraSyncPolicy>>
       image_info_approx_sync_;
       
-   std::unique_ptr<message_filters::TimeSynchronizer<sensor_msgs::Image,
+  std::unique_ptr<message_filters::TimeSynchronizer<sensor_msgs::Image,
                                                     sensor_msgs::CameraInfo>>
-      image_info_sync_;
-
-      
+      image_info_sync_; 
 
   // Pubs & subs
   ros::Publisher found_anchor_pub_;
@@ -112,11 +110,12 @@ class AsaRosNode {
   // will wait a full second on any failed attempt.
   double tf_lookup_timeout_;
 
-  // A flag indicating that the node will use an approximate time synchronization policy 
-  // to synchronize the images with the camera_info messages instead of the exact syncher
+  // A flag indicating that the node will use an approximate time synchronization  
+  // policy to synchronize the images with the camera_info messages instead of the 
+  // exact synchronizer
   bool use_approx_sync_policy;
 
-  // The que size of the subscribers used for approximate time policy synchronization
+  // The que size of the subscribers used for the image and camera_info topic
   int que_size;
 
   // Cache of which anchors are currently being queried. This will be only used
