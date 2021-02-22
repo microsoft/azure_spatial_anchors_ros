@@ -13,6 +13,12 @@
   <!-- Whether to print verbose status updated on every ingested frame. Very spammy. -->
   <arg name="print_status" default="false" />
 
+  <!-- Use approximate time synchronization between the image and camera_info topic-->
+  <arg name="use_approx_sync_policy" default="false"/>
+
+  <!-- Que size of the image and camera_info subscriber -->
+  <arg name="subscriber_que_size" default="1"/>
+
   <node name="asa_ros" type="asa_ros_node" pkg="asa_ros" output="screen" clear_params="true">
     <remap from="image" to="/camera/fisheye1_rect/image" />
     <remap from="camera_info" to="/camera/fisheye1_rect/camera_info" />
@@ -31,6 +37,8 @@
     <param name="anchor_frame_id" value="$(arg anchor_frame_id)" />
 
     <param name="print_status" value="$(arg print_status)" />
+    <param name="use_approx_sync_policy" value="$(arg use_approx_sync_policy)"/>
+    <param name="subscriber_que_size" value="$(arg subscriber_que_size)"/>
 
     <param name="anchor_id" value="$(arg anchor_id)" />
   </node>
