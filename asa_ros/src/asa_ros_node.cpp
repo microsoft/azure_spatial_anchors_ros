@@ -8,6 +8,7 @@
 
 namespace asa_ros {
 
+                                            
 AsaRosNode::AsaRosNode(const ros::NodeHandle& nh,
                        const ros::NodeHandle& nh_private)
     : nh_(nh),
@@ -23,16 +24,30 @@ AsaRosNode::AsaRosNode(const ros::NodeHandle& nh,
 
 AsaRosNode::~AsaRosNode() {}
 
+
 void AsaRosNode::initFromRosParams() {
+
+  nh_private_.param("subscriber_queue_size", queue_size, 1);
+  nh_private_.param("use_approx_sync_policy", use_approx_sync_policy, false);
+
+  if(queue_size > 1 || use_approx_sync_policy) {
+    ROS_INFO_STREAM("Starting image and info subscribers with approximate time sync, where que-size is " << queue_size);
+  }
+
   // Subscribe to the camera images.
-  image_sub_.subscribe(nh_, "image", 1);
-  info_sub_.subscribe(nh_, "camera_info", 1);
-  image_info_sync_.reset(
-      new message_filters::TimeSynchronizer<sensor_msgs::Image,
-                                            sensor_msgs::CameraInfo>(
-          image_sub_, info_sub_, 10));
-  image_info_sync_->registerCallback(
-      boost::bind(&AsaRosNode::imageAndInfoCallback, this, _1, _2));
+  image_sub_.subscribe(nh_, "image", queue_size);
+  info_sub_.subscribe(nh_, "camera_info", queue_size);
+  
+  if(use_approx_sync_policy) {
+    image_info_approx_sync_.reset(new message_filters::Synchronizer<CameraSyncPolicy>(CameraSyncPolicy(queue_size), image_sub_, info_sub_));
+    image_info_approx_sync_->registerCallback(boost::bind(&AsaRosNode::imageAndInfoCallback, this, _1, _2));
+  } else {
+    image_info_sync_.reset(
+        new message_filters::TimeSynchronizer<sensor_msgs::Image,
+                                              sensor_msgs::CameraInfo>(image_sub_, info_sub_, 10));
+    image_info_sync_->registerCallback(
+        boost::bind(&AsaRosNode::imageAndInfoCallback, this, _1, _2));
+  }
 
   // Subscribe to transform topics, if any.
   transform_sub_ =
@@ -97,11 +112,11 @@ void AsaRosNode::initFromRosParams() {
 void AsaRosNode::imageAndInfoCallback(
     const sensor_msgs::Image::ConstPtr& image,
     const sensor_msgs::CameraInfo::ConstPtr& camera_info) {
+  
   if (camera_frame_id_.empty()) {
     camera_frame_id_ = image->header.frame_id;
     ROS_INFO_STREAM("Set camera frame ID to " << camera_frame_id_);
   }
-
   // Look up its pose.
   if (tf_buffer_.canTransform(world_frame_id_, camera_frame_id_,
                               image->header.stamp,
