@@ -27,19 +27,19 @@ AsaRosNode::~AsaRosNode() {}
 
 void AsaRosNode::initFromRosParams() {
 
-  nh_private_.param("subscriber_que_size", que_size, 1);
+  nh_private_.param("subscriber_queue_size", queue_size, 1);
   nh_private_.param("use_approx_sync_policy", use_approx_sync_policy, false);
 
-  if(que_size > 1 || use_approx_sync_policy) {
-    ROS_INFO_STREAM("Starting image and info subscribers with approximate time sync, where que-size is " << que_size);
+  if(queue_size > 1 || use_approx_sync_policy) {
+    ROS_INFO_STREAM("Starting image and info subscribers with approximate time sync, where que-size is " << queue_size);
   }
 
   // Subscribe to the camera images.
-  image_sub_.subscribe(nh_, "image", que_size);
-  info_sub_.subscribe(nh_, "camera_info", que_size);
+  image_sub_.subscribe(nh_, "image", queue_size);
+  info_sub_.subscribe(nh_, "camera_info", queue_size);
   
   if(use_approx_sync_policy) {
-    image_info_approx_sync_.reset(new message_filters::Synchronizer<CameraSyncPolicy>(CameraSyncPolicy(que_size), image_sub_, info_sub_));
+    image_info_approx_sync_.reset(new message_filters::Synchronizer<CameraSyncPolicy>(CameraSyncPolicy(queue_size), image_sub_, info_sub_));
     image_info_approx_sync_->registerCallback(boost::bind(&AsaRosNode::imageAndInfoCallback, this, _1, _2));
   } else {
     image_info_sync_.reset(

@@ -115,8 +115,8 @@ class AsaRosNode {
   // exact synchronizer
   bool use_approx_sync_policy;
 
-  // The que size of the subscribers used for the image and camera_info topic
-  int que_size;
+  // The queue size of the subscribers used for the image and camera_info topic
+  int queue_size;
 
   // Cache of which anchors are currently being queried. This will be only used
   // when reset() (but not resetCompletely() is called, to restart any
