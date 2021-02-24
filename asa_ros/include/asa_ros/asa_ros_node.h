@@ -119,7 +119,7 @@ class AsaRosNode {
   int queue_size;
 
   // A flag that tells the asa interface to log debug logs
-  bool activate_logging;
+  bool activate_interface_level_logging;
 
   // Cache of which anchors are currently being queried. This will be only used
   // when reset() (but not resetCompletely() is called, to restart any

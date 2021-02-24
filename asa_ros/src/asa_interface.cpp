@@ -69,47 +69,6 @@ AzureSpatialAnchorsInterface::AzureSpatialAnchorsInterface(
   }
 }
 
-void AzureSpatialAnchorsInterface::ActivateDebugLogging(){
-  
-  session_->LogLevel(Microsoft::Azure::SpatialAnchors::SessionLogLevel::All);
-  session_->Diagnostics()->LogLevel(Microsoft::Azure::SpatialAnchors::SessionLogLevel::All);
-  session_->Diagnostics()->LogDirectory("/home/mrdrone/");
-  LOG(INFO) << "Diagnostics LogDirectory: " << session_->Diagnostics()->LogDirectory();
-  LOG(INFO) << "Diagnostics LogLevel: " << (int32_t)session_->Diagnostics()->LogLevel();
-  LOG(INFO) << "Session LogLevel: " << (int32_t)session_->LogLevel();
-
-
-  session_debuglog_token_.reset(
-      new Microsoft::Azure::SpatialAnchors::event_token);
-  *session_debuglog_token_ = session_->OnLogDebug(
-      std::bind(&AzureSpatialAnchorsInterface::sessionDebugHandler, this,
-                std::placeholders::_1, std::placeholders::_2));
-
-  session_error_token_.reset(
-    new asa::event_token);
-
-  *session_error_token_ = session_->Error(
-      std::bind(&AzureSpatialAnchorsInterface::sessionErrorHandler, this,
-                std::placeholders::_1, std::placeholders::_2));
-}
-
-void AzureSpatialAnchorsInterface::sessionDebugHandler(
-    void*,
-    const std::shared_ptr<
-        Microsoft::Azure::SpatialAnchors::OnLogDebugEventArgs>& args){
-  LOG(INFO) << args->Message();
-}
-
-void AzureSpatialAnchorsInterface::sessionErrorHandler(
-    void*,
-    const std::shared_ptr<
-        Microsoft::Azure::SpatialAnchors::SessionErrorEventArgs>& args){
-  LOG(INFO) << "----- ERROR -----";
-  LOG(INFO) << "Error Code: " << (int32_t)args->ErrorCode();
-  LOG(INFO) << "Error Message: " << args->ErrorMessage();
-}
-
-
 void AzureSpatialAnchorsInterface::start() {
   // Create a session handle and session.
   asa_session_handle context_handle =
@@ -542,5 +501,47 @@ bool AzureSpatialAnchorsInterface::isValidUuid(const std::string& id) {
       "9a-fA-F]{12}");
   return std::regex_match(id, uuid_regex);
 }
+
+
+void AzureSpatialAnchorsInterface::ActivateInterfaceLevelLogging(){
+  
+  session_->LogLevel(Microsoft::Azure::SpatialAnchors::SessionLogLevel::All);
+  session_->Diagnostics()->LogLevel(Microsoft::Azure::SpatialAnchors::SessionLogLevel::All);
+  session_->Diagnostics()->LogDirectory("/home/mrdrone/");
+  LOG(INFO) << "Diagnostics LogDirectory: " << session_->Diagnostics()->LogDirectory();
+  LOG(INFO) << "Diagnostics LogLevel: " << (int32_t)session_->Diagnostics()->LogLevel();
+  LOG(INFO) << "Session LogLevel: " << (int32_t)session_->LogLevel();
+
+
+  session_debuglog_token_.reset(
+      new Microsoft::Azure::SpatialAnchors::event_token);
+  *session_debuglog_token_ = session_->OnLogDebug(
+      std::bind(&AzureSpatialAnchorsInterface::sessionDebugHandler, this,
+                std::placeholders::_1, std::placeholders::_2));
+
+  session_error_token_.reset(
+    new asa::event_token);
+
+  *session_error_token_ = session_->Error(
+      std::bind(&AzureSpatialAnchorsInterface::sessionErrorHandler, this,
+                std::placeholders::_1, std::placeholders::_2));
+}
+
+void AzureSpatialAnchorsInterface::sessionDebugHandler(
+    void*,
+    const std::shared_ptr<
+        Microsoft::Azure::SpatialAnchors::OnLogDebugEventArgs>& args){
+  LOG(INFO) << args->Message();
+}
+
+void AzureSpatialAnchorsInterface::sessionErrorHandler(
+    void*,
+    const std::shared_ptr<
+        Microsoft::Azure::SpatialAnchors::SessionErrorEventArgs>& args){
+  LOG(ERROR) << "----- ERROR -----";
+  LOG(ERROR) << "Error Code: " << (int32_t)args->ErrorCode();
+  LOG(ERROR) << "Error Message: " << args->ErrorMessage();
+}
+
 
 }  // namespace asa_ros

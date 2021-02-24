@@ -53,9 +53,6 @@ class AzureSpatialAnchorsInterface {
 
   // MUST be called before anything else.
   void start();
-  
-  // Attatches a few logging handlers
-  void ActivateDebugLogging();
 
   // Resets any visual data with the current session.
   // Image data will be wiped, but this would allow you to re-locate anchors
@@ -118,6 +115,9 @@ class AzureSpatialAnchorsInterface {
   static std::string trimWhitespace(const std::string& s);
   static std::vector<std::string> splitByDelimeter(const std::string& s,
                                                    char delimiter);
+  
+  // Attatches a few logging handlers
+  void ActivateInterfaceLevelLogging();
 
  private:
   // Callback for session updates. Currently optionally prints to LOG(INFO).
@@ -126,13 +126,13 @@ class AzureSpatialAnchorsInterface {
       const std::shared_ptr<
           Microsoft::Azure::SpatialAnchors::SessionUpdatedEventArgs>& args);
   
-  // Callback for session debug logs.
+  // Callback for session debug logs invoked by the Linux SDK
   void sessionDebugHandler(
       void*,
       const std::shared_ptr<
           Microsoft::Azure::SpatialAnchors::OnLogDebugEventArgs>& args);
 
-  // Callback for session error logs.
+  // Callback for session error logs invoked by the Linux SDK
   void sessionErrorHandler(
       void*,
       const std::shared_ptr<
