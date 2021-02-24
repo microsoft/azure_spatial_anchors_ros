@@ -117,6 +117,12 @@ void AsaRosNode::imageAndInfoCallback(
     camera_frame_id_ = image->header.frame_id;
     ROS_INFO_STREAM("Set camera frame ID to " << camera_frame_id_);
   }
+
+  if(camera_info->K[0] == 0 && camera_info->K[4] == 0)
+  {
+    ROS_WARN_ONCE("The camera_info topic reported focal lengths of 0 for x & z. The anchor creation will fail.");
+  }
+
   // Look up its pose.
   if (tf_buffer_.canTransform(world_frame_id_, camera_frame_id_,
                               image->header.stamp,
