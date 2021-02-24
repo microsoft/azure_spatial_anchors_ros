@@ -50,6 +50,7 @@ void asaToEigenTransform(
   tf_eigen->translation() = translation.cast<double>();
 }
 
+
 AzureSpatialAnchorsInterface::AzureSpatialAnchorsInterface(
     const AsaRosConfig& config)
     : config_(config), frame_count_(0) {
@@ -67,6 +68,47 @@ AzureSpatialAnchorsInterface::AzureSpatialAnchorsInterface(
     session_->Configuration()->AccountDomain(config.account_domain);
   }
 }
+
+void AzureSpatialAnchorsInterface::ActivateDebugLogging(){
+  
+  session_->LogLevel(Microsoft::Azure::SpatialAnchors::SessionLogLevel::All);
+  session_->Diagnostics()->LogLevel(Microsoft::Azure::SpatialAnchors::SessionLogLevel::All);
+  session_->Diagnostics()->LogDirectory("/home/mrdrone/");
+  LOG(INFO) << "Diagnostics LogDirectory: " << session_->Diagnostics()->LogDirectory();
+  LOG(INFO) << "Diagnostics LogLevel: " << (int32_t)session_->Diagnostics()->LogLevel();
+  LOG(INFO) << "Session LogLevel: " << (int32_t)session_->LogLevel();
+
+
+  session_debuglog_token_.reset(
+      new Microsoft::Azure::SpatialAnchors::event_token);
+  *session_debuglog_token_ = session_->OnLogDebug(
+      std::bind(&AzureSpatialAnchorsInterface::sessionDebugHandler, this,
+                std::placeholders::_1, std::placeholders::_2));
+
+  session_error_token_.reset(
+    new asa::event_token);
+
+  *session_error_token_ = session_->Error(
+      std::bind(&AzureSpatialAnchorsInterface::sessionErrorHandler, this,
+                std::placeholders::_1, std::placeholders::_2));
+}
+
+void AzureSpatialAnchorsInterface::sessionDebugHandler(
+    void*,
+    const std::shared_ptr<
+        Microsoft::Azure::SpatialAnchors::OnLogDebugEventArgs>& args){
+  LOG(INFO) << args->Message();
+}
+
+void AzureSpatialAnchorsInterface::sessionErrorHandler(
+    void*,
+    const std::shared_ptr<
+        Microsoft::Azure::SpatialAnchors::SessionErrorEventArgs>& args){
+  LOG(INFO) << "----- ERROR -----";
+  LOG(INFO) << "Error Code: " << (int32_t)args->ErrorCode();
+  LOG(INFO) << "Error Message: " << args->ErrorMessage();
+}
+
 
 void AzureSpatialAnchorsInterface::start() {
   // Create a session handle and session.
@@ -236,6 +278,7 @@ bool AzureSpatialAnchorsInterface::createAnchor(
     LOG(INFO) << "Spatial Anchor Identifier = " << asa_anchor->Identifier();
 
   } catch (std::exception& e) {
+    LOG(ERROR) << "Exception thrown on line 239";
     LOG(ERROR) << "Failed to create anchor: " << e.what();
     return false;
   }
@@ -274,13 +317,16 @@ bool AzureSpatialAnchorsInterface::createAnchorWithCallback(
   // stores the pose).
   cloud_anchor_->LocalAnchor(local_anchor_->GetHandle());
 
+  LOG(INFO) << "Cloud anchor: " << cloud_anchor_ << "/n";
+  LOG(INFO) << "Anchor session: " << session_ << "/n";
+  
   asa::Status status;
   try {
     frame_mutex_.lock();
     session_->CreateAnchorAsync(
         cloud_anchor_, [this, callback](asa::Status status) {
           LOG(INFO) << "Create anchor status: " << to_string(status);
-          this->frame_mutex_.unlock();
+          this->frame_mutex_.unlock();  
           callback(status == asa::Status::OK, this->cloud_anchor_->Identifier(),
                    to_string(status));
           cloud_anchor_.reset();
@@ -288,6 +334,7 @@ bool AzureSpatialAnchorsInterface::createAnchorWithCallback(
           create_anchor_mutex_.unlock();
         });
   } catch (std::exception& e) {
+    LOG(ERROR) << "Exception thrown on line 292";
     LOG(ERROR) << "Failed to create anchor: " << e.what();
     frame_mutex_.unlock();
     create_anchor_mutex_.unlock();
@@ -447,6 +494,8 @@ bool AzureSpatialAnchorsInterface::queryAnchorsWithCallback(
   }
   return true;
 }
+
+
 
 void AzureSpatialAnchorsInterface::sessionUpdateHandler(
     void*,
