@@ -109,6 +109,11 @@ void AsaRosNode::initFromRosParams() {
   }
 }
 
+// Returns true if the camera intrinsics seem to be valid. Does not validate correctness
+bool ValidateCameraIntrinsics(const boost::array<double, 9> K, int image_height, int image_width){
+  return K.at(0) > 0 && K.at(4) > 0 && K.at(2) >= 0 && K.at(5) >= 0 && image_height > 0 && image_width > 0;
+}
+
 void AsaRosNode::imageAndInfoCallback(
     const sensor_msgs::Image::ConstPtr& image,
     const sensor_msgs::CameraInfo::ConstPtr& camera_info) {
@@ -117,6 +122,11 @@ void AsaRosNode::imageAndInfoCallback(
     camera_frame_id_ = image->header.frame_id;
     ROS_INFO_STREAM("Set camera frame ID to " << camera_frame_id_);
   }
+
+  if(!ValidateCameraIntrinsics(camera_info->K, image->height, image->width)){
+    ROS_WARN_ONCE("The camera_info topic reported invalid values. The anchor creation will fail. Check the camera configuration.");
+  }
+
   // Look up its pose.
   if (tf_buffer_.canTransform(world_frame_id_, camera_frame_id_,
                               image->header.stamp,
