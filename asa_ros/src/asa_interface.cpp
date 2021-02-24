@@ -237,7 +237,6 @@ bool AzureSpatialAnchorsInterface::createAnchor(
     LOG(INFO) << "Spatial Anchor Identifier = " << asa_anchor->Identifier();
 
   } catch (std::exception& e) {
-    LOG(ERROR) << "Exception thrown on line 239";
     LOG(ERROR) << "Failed to create anchor: " << e.what();
     return false;
   }
@@ -293,7 +292,6 @@ bool AzureSpatialAnchorsInterface::createAnchorWithCallback(
           create_anchor_mutex_.unlock();
         });
   } catch (std::exception& e) {
-    LOG(ERROR) << "Exception thrown on line 292";
     LOG(ERROR) << "Failed to create anchor: " << e.what();
     frame_mutex_.unlock();
     create_anchor_mutex_.unlock();
