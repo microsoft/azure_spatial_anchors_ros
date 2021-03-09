@@ -2,7 +2,13 @@
 
 This is a ROS wrapper for the Azure Spatial Anchors Linux SDK, allowing robots (and other devices equipped with a vision-based sensors and a pose estimation system) to create and query [Azure Spatial Anchors](https://azure.microsoft.com/en-us/services/spatial-anchors/), allowing the robot to co-localize with AR-enabled phones and Hololens devices.
 
-This is presented as part of the [IROS 2020 Tutorial on Mixed Reality and Robotics](https://www.microsoft.com/en-us/research/event/mixed-reality-and-robotics-tutorial-iros-2020/). Tutorial videos are available for free starting October 25th through [IROS 2020](https://www.iros2020.org/).
+This was presented as part of the [IROS 2020 Tutorial on Mixed Reality and Robotics](https://www.microsoft.com/en-us/research/event/mixed-reality-and-robotics-tutorial-iros-2020/). The tutorial _was_ available from October 2020 until January 2021 at https://www.iros2020.org/.
+
+The lecture content of the tutorial is now available as a Microsoft Research Webinar: https://note.microsoft.com/MSR-Webinar-Reality-and-Robotics-Registration-On-Demand.html
+
+The hands-on video walkthroughs for the demos are available on the MSR YouTube channel:
+- [Demo 1: Interaction](https://youtu.be/4G3wjPIs4Fc) (the demo that uses the sample code in [this repo](https://github.com/microsoft/mixed-reality-robot-interaction-demo))
+- [Demo 2: Colocalization](https://youtu.be/P11LcMOp2CE) (the demo that goes with this repo and is described in the [wiki](https://github.com/microsoft/azure_spatial_anchors_ros/wiki/Demo))
 
 You can sign up to get access to the Azure Spatial Anchors Linux SDK here: [aka.ms/ASALinuxSDKSignup](http://aka.ms/ASALinuxSDKSignup).
 **This is REQUIRED to use this repo.** It may take us up to 2 business days to add you. This requires an [Azure Devops account](https://azure.microsoft.com/en-us/services/devops/).
