@@ -19,7 +19,7 @@ Please see instructions for the [ASA Quickstarts](https://docs.microsoft.com/en-
 # Requirements
 - Ubuntu 18.04/20.04
 - ROS melodic or noetic
-- [Azure Portal](https://azure.microsoft.com/account/portal) account with an Azure Spatial Anchors resource.
+- [Azure Portal](https://portal.azure.com/) account with an Azure Spatial Anchors resource.
 - [Azure Devops account](https://azure.microsoft.com/en-us/services/devops/) account.
 - [Signed up for Azure Spatial Anchors Linux SDK](http://aka.ms/ASALinuxSDKSignup), which may take 1-2 days.
 
