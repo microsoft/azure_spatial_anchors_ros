@@ -2,6 +2,7 @@
 
 #include <cv_bridge/cv_bridge.h>
 #include <tf2_eigen/tf2_eigen.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <Eigen/Geometry>
 
 #include "asa_ros/asa_ros_node.h"
@@ -189,8 +190,32 @@ void AsaRosNode::anchorFoundCallback(
 
 bool AsaRosNode::createAnchorCallback(asa_ros_msgs::CreateAnchorRequest& req,
                                       asa_ros_msgs::CreateAnchorResponse& res) {
+  Eigen::Affine3d anchor_in_target_frame;
+  anchor_in_target_frame = tf2::transformToEigen(req.anchor_in_target_frame);
+
+  // Compute anchor in world frame if pose given relative to target frame
   Eigen::Affine3d anchor_in_world_frame;
-  anchor_in_world_frame = tf2::transformToEigen(req.anchor_in_world_frame);
+  if(req.target_frame.empty()) {
+    anchor_in_world_frame = anchor_in_target_frame;
+  }
+  else {
+    geometry_msgs::TransformStamped target_in_world_frame_tf;
+    try{
+      target_in_world_frame_tf =
+          tf_buffer_.lookupTransform(world_frame_id_,
+                                     req.target_frame,
+                                     ros::Time::now(),
+                                     ros::Duration(tf_lookup_timeout_));
+      anchor_in_world_frame = tf2::transformToEigen(target_in_world_frame_tf) *
+                                  anchor_in_target_frame;
+    }
+    catch (tf2::TransformException ex){
+      ROS_ERROR_STREAM("Failed to find target frame in TF tree.\n" <<
+                       "Creating anchor with respect to world frame.\n" <<
+                       ex.what());
+      anchor_in_world_frame = anchor_in_target_frame;
+    }
+  }
 
   bool success = interface_->createAnchorWithCallback(
       anchor_in_world_frame,

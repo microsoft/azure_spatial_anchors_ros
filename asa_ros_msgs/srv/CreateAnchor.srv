@@ -1,7 +1,11 @@
-# Pose of the desired anchor expressed in the world frame.
-# If not set, will set it to identity (i.e., world frame) in a Z-up,
+# Frame_id for target frame.  Defaults to world frame.
+# The desired anchor pose should be expressed relative to this frame.
+string target_frame
+
+# Pose of the desired anchor expressed in the target frame.
+# If not set, will set it to identity (i.e., target frame) in a Z-up,
 # X-forward coordinate system (ROS canonical).
-geometry_msgs/TransformStamped anchor_in_world_frame
+geometry_msgs/TransformStamped anchor_in_target_frame
 ---
 # Since anchor creation takes several seconds, the actual anchor ID, etc. will
 # be published on the /created_anchor topic.
