@@ -123,6 +123,9 @@ class AsaRosNode {
   // The queue size of the subscribers used for the image and camera_info topic
   int queue_size;
 
+  // A flag that tells the asa interface to log debug logs
+  bool activate_interface_level_logging;
+
   // Cache of which anchors are currently being queried. This will be only used
   // when reset() (but not resetCompletely() is called, to restart any
   // previous watchers.
