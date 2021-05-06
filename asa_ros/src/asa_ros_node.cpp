@@ -29,6 +29,7 @@ void AsaRosNode::initFromRosParams() {
 
   nh_private_.param("subscriber_queue_size", queue_size, 1);
   nh_private_.param("use_approx_sync_policy", use_approx_sync_policy, false);
+  nh_private_.param("activate_interface_level_logging", activate_interface_level_logging, false);
 
   if(queue_size > 1 || use_approx_sync_policy) {
     ROS_INFO_STREAM("Starting image and info subscribers with approximate time sync, where que-size is " << queue_size);
@@ -97,6 +98,11 @@ void AsaRosNode::initFromRosParams() {
                                      << asa_config.account_key);
 
   interface_.reset(new AzureSpatialAnchorsInterface(asa_config));
+
+  if(activate_interface_level_logging){
+    interface_->ActivateInterfaceLevelLogging();
+  }
+  
   interface_->start();
 
   std::string anchor_id;

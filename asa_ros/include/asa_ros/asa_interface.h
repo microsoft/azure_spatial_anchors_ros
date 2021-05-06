@@ -19,6 +19,8 @@ class CloudSpatialAnchorSession;
 class CloudSpatialAnchorWatcher;
 class CloudSpatialAnchor;
 class SessionUpdatedEventArgs;
+class OnLogDebugEventArgs;
+class SessionErrorEventArgs;
 struct event_token;
 }  // namespace SpatialAnchors
 }  // namespace Azure
@@ -113,6 +115,9 @@ class AzureSpatialAnchorsInterface {
   static std::string trimWhitespace(const std::string& s);
   static std::vector<std::string> splitByDelimeter(const std::string& s,
                                                    char delimiter);
+  
+  // Attatches a few logging handlers
+  void ActivateInterfaceLevelLogging();
 
  private:
   // Callback for session updates. Currently optionally prints to LOG(INFO).
@@ -120,6 +125,18 @@ class AzureSpatialAnchorsInterface {
       void*,
       const std::shared_ptr<
           Microsoft::Azure::SpatialAnchors::SessionUpdatedEventArgs>& args);
+  
+  // Callback for session debug logs invoked by the Linux SDK
+  void sessionDebugHandler(
+      void*,
+      const std::shared_ptr<
+          Microsoft::Azure::SpatialAnchors::OnLogDebugEventArgs>& args);
+
+  // Callback for session error logs invoked by the Linux SDK
+  void sessionErrorHandler(
+      void*,
+      const std::shared_ptr<
+          Microsoft::Azure::SpatialAnchors::SessionErrorEventArgs>& args);
 
   // Cache the configuration settings for stuff that needs to be used at
   // run-time.
@@ -157,6 +174,10 @@ class AzureSpatialAnchorsInterface {
       session_update_token_;
   std::unique_ptr<Microsoft::Azure::SpatialAnchors::event_token>
       anchor_located_token_;
+  std::unique_ptr<Microsoft::Azure::SpatialAnchors::event_token>
+      session_debuglog_token_;
+  std::unique_ptr<Microsoft::Azure::SpatialAnchors::event_token>
+      session_error_token_;
 
   // Keep track of how many frames were added.
   size_t frame_count_;
