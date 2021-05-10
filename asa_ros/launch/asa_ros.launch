@@ -22,6 +22,9 @@
   <!-- If true the asa interface loggs Debug Messages and Errors to the screen -->
   <arg name="activate_interface_level_logging" default="false"/>
 
+  <!-- If true, query the last anchor id that was created from this machine. -->
+  <arg name="query_last_anchor_id_from_cache" default="true"/>
+
   <node name="asa_ros" type="asa_ros_node" pkg="asa_ros" output="screen" clear_params="true">
     <remap from="image" to="/camera/fisheye1_rect/image" />
     <remap from="camera_info" to="/camera/fisheye1_rect/camera_info" />
@@ -43,6 +46,8 @@
     <param name="use_approx_sync_policy" value="$(arg use_approx_sync_policy)"/>
     <param name="subscriber_queue_size" value="$(arg subscriber_queue_size)"/>
     <param name="activate_interface_level_logging" value="$(arg activate_interface_level_logging)"/>
+
+    <param name="query_last_anchor_id_from_cache" value="$(arg query_last_anchor_id_from_cache)"/>
 
     <param name="anchor_id" value="$(arg anchor_id)" />
   </node>
