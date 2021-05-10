@@ -1,3 +1,7 @@
+#include <cstdlib>
+#include <fstream>
+#include <sstream>
+
 #include <glog/logging.h>
 
 #include <cv_bridge/cv_bridge.h>
@@ -114,6 +118,14 @@ void AsaRosNode::initFromRosParams() {
         anchor_id, std::bind(&AsaRosNode::anchorFoundCallback, this,
                              std::placeholders::_1, std::placeholders::_2));
   }
+  else if(query_last_anchor_id_from_cache_) {
+    // Or look for the last created anchor if this flag is set
+    const std::string cached_anchor_id = readCachedAnchorId();
+    ROS_INFO_STREAM("Querying cached anchor id: " << cached_anchor_id);
+    interface_->queryAnchorWithCallback(
+        cached_anchor_id, std::bind(&AsaRosNode::anchorFoundCallback, this,
+                             std::placeholders::_1, std::placeholders::_2));
+  }
 }
 
 // Returns true if the camera intrinsics seem to be valid. Does not validate correctness
@@ -223,6 +235,9 @@ void AsaRosNode::anchorCreatedCallback(bool success,
     ROS_WARN_STREAM("Unable to create anchor. Reason: " << reason);
   }
   created_anchor_pub_.publish(anchor_msg);
+  if(storeAnchorIdInCache(anchor_id)) {
+    ROS_INFO_STREAM("Stored anchor id in cache.");
+  }
 }
 
 bool AsaRosNode::queryAnchors(const std::string& anchor_ids) {
@@ -243,6 +258,53 @@ void AsaRosNode::createAnchorTimerCallback(const ros::TimerEvent& e) {
   Eigen::Affine3d anchor_in_world_frame = Eigen::Affine3d::Identity();
   interface_->createAnchor(anchor_in_world_frame, &id);
   ROS_INFO_STREAM("Created an anchor with ID: " << id);
+}
+
+std::string AsaRosNode::readCachedAnchorId() {
+  const char *tmp = getenv("ROS_HOME");
+  std::string ros_home(tmp ? tmp : "");
+
+  std::string cached_anchor_id;
+  if(ros_home.empty()) {
+    ROS_ERROR_STREAM("Could not read from anchor id cache file. " <<
+                     "$ROS_HOME environmental variable is not defined.");
+  }
+  else {
+    // Try to read cache file
+    std::string cache_path = ros_home + "/last_anchor_id";
+    std::ifstream cache_file(cache_path.c_str());
+    if(cache_file) {
+      std::ostringstream ss;
+      ss << cache_file.rdbuf();
+      cached_anchor_id = ss.str();
+    }
+    ROS_INFO_STREAM("Read anchor id: " << cached_anchor_id << " from cache");
+  }
+
+  return cached_anchor_id;
+}
+
+bool AsaRosNode::storeAnchorIdInCache(const std::string& created_anchor_id) {
+  const char *tmp = getenv("ROS_HOME");
+  std::string ros_home(tmp ? tmp : "");
+
+  if(ros_home.empty()) {
+    ROS_ERROR_STREAM("Could not write to anchor id cache file. " <<
+                     "$ROS_HOME environmental variable is not defined.");
+    return false;
+  }
+
+  std::string cache_path = ros_home + "/last_anchor_id";
+  std::ofstream cache_file(cache_path.c_str());
+  if(cache_file) {
+    cache_file << created_anchor_id;
+    cache_file.close();
+    return true;
+  }
+  else {
+    ROS_ERROR_STREAM("Could not open anchor cache file: " << cache_path);
+    return false;
+  }
 }
 
 // Does a "soft" reset: continues to try to find any anchors that are

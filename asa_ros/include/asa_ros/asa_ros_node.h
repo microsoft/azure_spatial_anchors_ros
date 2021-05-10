@@ -68,6 +68,13 @@ class AsaRosNode {
   // Timer callbacks.
   void createAnchorTimerCallback(const ros::TimerEvent& e);
 
+  // Functions to read and write anchor ids from files for caching
+  // Automatically stores last created anchor to $ROS_HOME/last_anchor_id
+  // If query_last_anchor_id_from_cache param is true, then the node
+  // reads the id from this file and queries for that one.
+  std::string readCachedAnchorId();
+  bool storeAnchorIdInCache(const std::string& created_anchor_id);
+
   // Nodehandles, publishers, subscribers.
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;
