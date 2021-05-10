@@ -16,9 +16,6 @@
   <!-- Que size of the image and camera_info subscriber -->
   <arg name="subscriber_queue_size" default="1"/>
 
-  <!-- If true the asa interface loggs Debug Messages and Errors to the screen -->
-  <arg name="activate_interface_level_logging" default="false"/>
-
   <node name="asa_ros" type="asa_ros_node" pkg="asa_ros" output="screen" clear_params="true">
     <remap from="image" to="/camera/fisheye1_rect/image" />
     <remap from="camera_info" to="/camera/fisheye1_rect/camera_info" />
@@ -38,7 +35,6 @@
 
     <param name="use_approx_sync_policy" value="$(arg use_approx_sync_policy)"/>
     <param name="subscriber_queue_size" value="$(arg subscriber_queue_size)"/>
-    <param name="activate_interface_level_logging" value="$(arg activate_interface_level_logging)"/>
 
     <param name="anchor_id" value="$(arg anchor_id)" />
   </node>
