@@ -33,11 +33,31 @@ void AsaRosNode::initFromRosParams() {
 
   nh_private_.param("subscriber_queue_size", queue_size_, 1);
   nh_private_.param("use_approx_sync_policy", use_approx_sync_policy_, false);
-  nh_private_.param("activate_interface_level_logging", activate_interface_level_logging_, false);
-  nh_private_.param("query_last_anchor_id_from_cache", query_last_anchor_id_from_cache_, false);
+  nh_private_.param("activate_interface_level_logging",
+                    activate_interface_level_logging_,
+                    false);
+  nh_private_.param("query_last_anchor_id_from_cache",
+                    query_last_anchor_id_from_cache_,
+                    false);
+
+  // Set anchor id cache path
+  std::string last_anchor_cache_path_default;
+  // $HOME should be defined, but if not, put it in /tmp
+  const char *home_path = getenv("HOME");
+  if(home_path) {
+    last_anchor_cache_path_default = std::string(home_path) +
+                                     "/.ros/last_anchor_id";
+  }
+  else {
+    last_anchor_cache_path_default = "/tmp/last_anchor_id";
+  }
+  nh_private_.param<std::string>("last_anchor_cache_path",
+                                 last_anchor_cache_path_,
+                                 last_anchor_cache_path_default);
 
   if(queue_size_ > 1 || use_approx_sync_policy_) {
-    ROS_INFO_STREAM("Starting image and info subscribers with approximate time sync, where queue size is " << queue_size_);
+    ROS_INFO_STREAM("Starting image and info subscribers with approximate " <<
+                    "time sync, where queue size is " << queue_size_);
   }
 
   // Subscribe to the camera images.
@@ -261,48 +281,34 @@ void AsaRosNode::createAnchorTimerCallback(const ros::TimerEvent& e) {
 }
 
 std::string AsaRosNode::readCachedAnchorId() {
-  const char *tmp = getenv("ROS_HOME");
-  std::string ros_home(tmp ? tmp : "");
-
   std::string cached_anchor_id;
-  if(ros_home.empty()) {
-    ROS_ERROR_STREAM("Could not read from anchor id cache file. " <<
-                     "$ROS_HOME environmental variable is not defined.");
+
+  // Try to read cache file
+  std::ifstream cache_file(last_anchor_cache_path_.c_str());
+  if(cache_file) {
+    std::ostringstream ss;
+    ss << cache_file.rdbuf();
+    cached_anchor_id = ss.str();
+    ROS_INFO_STREAM("Read anchor id: " << cached_anchor_id << " from cache");
   }
   else {
-    // Try to read cache file
-    std::string cache_path = ros_home + "/last_anchor_id";
-    std::ifstream cache_file(cache_path.c_str());
-    if(cache_file) {
-      std::ostringstream ss;
-      ss << cache_file.rdbuf();
-      cached_anchor_id = ss.str();
-    }
-    ROS_INFO_STREAM("Read anchor id: " << cached_anchor_id << " from cache");
+    ROS_ERROR_STREAM("Could not read from anchor id cache file: " <<
+                      last_anchor_cache_path_);
   }
 
   return cached_anchor_id;
 }
 
 bool AsaRosNode::storeAnchorIdInCache(const std::string& created_anchor_id) {
-  const char *tmp = getenv("ROS_HOME");
-  std::string ros_home(tmp ? tmp : "");
-
-  if(ros_home.empty()) {
-    ROS_ERROR_STREAM("Could not write to anchor id cache file. " <<
-                     "$ROS_HOME environmental variable is not defined.");
-    return false;
-  }
-
-  std::string cache_path = ros_home + "/last_anchor_id";
-  std::ofstream cache_file(cache_path.c_str());
+  std::ofstream cache_file(last_anchor_cache_path_.c_str());
   if(cache_file) {
     cache_file << created_anchor_id;
     cache_file.close();
     return true;
   }
   else {
-    ROS_ERROR_STREAM("Could not open anchor cache file: " << cache_path);
+    ROS_ERROR_STREAM("Could not open anchor cache file for writing: " <<
+                     last_anchor_cache_path_);
     return false;
   }
 }

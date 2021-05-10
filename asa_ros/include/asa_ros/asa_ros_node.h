@@ -132,6 +132,9 @@ class AsaRosNode {
   // the anchor id from a cache file, or to manually provide one.
   bool query_last_anchor_id_from_cache_;
 
+  // Path to anchor id cache.  Defaults to ~/.ros/last_anchor_id
+  std::string last_anchor_cache_path_;
+
   // Cache of which anchors are currently being queried. This will be only used
   // when reset() (but not resetCompletely() is called, to restart any
   // previous watchers.
