@@ -42,8 +42,6 @@ struct AsaRosConfig {
   // Flip the optical axes to be in the OpenGL convention (IOS/Android/API2).
   // Should not be necessary in latest SDK versions.
   bool force_opengl_axes = false;
-  // Whether to print status updates for the session. Mostly for debugging.
-  bool print_status = true;
 };
 
 class AzureSpatialAnchorsInterface {

@@ -91,8 +91,6 @@ void AsaRosNode::initFromRosParams() {
                     asa_config.account_key);
   nh_private_.param("account_domain", asa_config.account_domain,
                     asa_config.account_domain);
-  nh_private_.param("print_status", asa_config.print_status,
-                    asa_config.print_status);
 
   ROS_INFO_STREAM("Account domain: " << asa_config.account_domain
                                      << " account ID: " << asa_config.account_id

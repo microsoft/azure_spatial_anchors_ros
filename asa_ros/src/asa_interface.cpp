@@ -470,16 +470,6 @@ void AzureSpatialAnchorsInterface::sessionUpdateHandler(
   feedback_callback_(ready_for_create_progress,
                      recommended_for_create_progress,
                      user_feedback);
-
-  if (config_.print_status) {
-    LOG(INFO) << "----------------------------------------------------------\n";
-    LOG(INFO) << "      ReadyForCreateProgress : "
-              << ready_for_create_progress << "\n";
-    LOG(INFO) << "RecommendedForCreateProgress : "
-              << recommended_for_create_progress << "\n";
-    LOG(INFO) << "                UserFeedback : "
-              << user_feedback << "\n";
-  }
 }
 
 void AzureSpatialAnchorsInterface::setCreateAnchorFeedbackCallback(
