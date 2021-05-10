@@ -1,0 +1,3 @@
+float32 ready_for_create_progress
+float32 recommended_for_create_progress
+string  user_feedback

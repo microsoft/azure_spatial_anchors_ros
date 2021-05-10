@@ -59,6 +59,8 @@ void AsaRosNode::initFromRosParams() {
       nh_private_.advertise<asa_ros_msgs::FoundAnchor>("found_anchor", 1, true);
   created_anchor_pub_ = nh_private_.advertise<asa_ros_msgs::CreatedAnchor>(
       "created_anchor", 1, true);
+  feedback_pub_ = nh_private_.advertise<asa_ros_msgs::CreateAnchorFeedback>(
+      "create_anchor_feedback", 1, true);
 
   // Services.
   create_anchor_srv_ = nh_private_.advertiseService(
@@ -89,8 +91,6 @@ void AsaRosNode::initFromRosParams() {
                     asa_config.account_key);
   nh_private_.param("account_domain", asa_config.account_domain,
                     asa_config.account_domain);
-  nh_private_.param("print_status", asa_config.print_status,
-                    asa_config.print_status);
 
   ROS_INFO_STREAM("Account domain: " << asa_config.account_domain
                                      << " account ID: " << asa_config.account_id
@@ -98,11 +98,13 @@ void AsaRosNode::initFromRosParams() {
                                      << asa_config.account_key);
 
   interface_.reset(new AzureSpatialAnchorsInterface(asa_config));
-
+  interface_->setCreateAnchorFeedbackCallback(
+    std::bind(&AsaRosNode::createAnchorFeedbackCallback, this,
+              std::placeholders::_1, std::placeholders::_2,
+              std::placeholders::_3));
   if(activate_interface_level_logging){
     interface_->ActivateInterfaceLevelLogging();
   }
-  
   interface_->start();
 
   std::string anchor_id;
@@ -235,6 +237,20 @@ bool AsaRosNode::queryAnchors(const std::string& anchor_ids) {
     return true;
   }
   return false;
+}
+
+void AsaRosNode::createAnchorFeedbackCallback(
+    const float ready_for_create_progress,
+    const float recommended_for_create_progress,
+    const std::string& user_feedback) {
+
+  if(feedback_pub_.getNumSubscribers() > 0) {
+    asa_ros_msgs::CreateAnchorFeedback msg;
+    msg.ready_for_create_progress = ready_for_create_progress;
+    msg.recommended_for_create_progress = recommended_for_create_progress;
+    msg.user_feedback = user_feedback;
+    feedback_pub_.publish(msg);
+  }
 }
 
 void AsaRosNode::createAnchorTimerCallback(const ros::TimerEvent& e) {
