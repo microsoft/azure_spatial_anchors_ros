@@ -42,8 +42,6 @@ struct AsaRosConfig {
   // Flip the optical axes to be in the OpenGL convention (IOS/Android/API2).
   // Should not be necessary in latest SDK versions.
   bool force_opengl_axes = false;
-  // Whether to print status updates for the session. Mostly for debugging.
-  bool print_status = true;
 };
 
 class AzureSpatialAnchorsInterface {
@@ -109,6 +107,12 @@ class AzureSpatialAnchorsInterface {
   bool queryAnchorsWithCallback(const std::vector<std::string>& anchor_ids,
                                 const FoundAnchorCallbackFunction& callback);
 
+  // Set the callback function to publish ancho creating feedback to ROS
+  typedef std::function<void(const float, const float, const std::string&)>
+      CreateAnchorFeedbackCallbackFunction;
+  void setCreateAnchorFeedbackCallback(
+      const CreateAnchorFeedbackCallbackFunction& callback);
+
   // === Helpers ===
   // Validate that a string is a valid UUID for Anchor UUID, account IDs, etc.
   static bool isValidUuid(const std::string& id);
@@ -118,6 +122,7 @@ class AzureSpatialAnchorsInterface {
   
   // Attatches a few logging handlers
   void ActivateInterfaceLevelLogging();
+
 
  private:
   // Callback for session updates. Currently optionally prints to LOG(INFO).
@@ -181,6 +186,9 @@ class AzureSpatialAnchorsInterface {
 
   // Keep track of how many frames were added.
   size_t frame_count_;
+
+  // Callback function to send create anchor feedback to ROS
+  CreateAnchorFeedbackCallbackFunction feedback_callback_;
 
   // Mutex for locking new frames when creating an anchor.
   std::mutex frame_mutex_;

@@ -460,15 +460,21 @@ void AzureSpatialAnchorsInterface::sessionUpdateHandler(
         Microsoft::Azure::SpatialAnchors::SessionUpdatedEventArgs>& args) {
   std::unique_lock<std::mutex> lock(session_update_mutex_);
 
-  if (config_.print_status) {
-    LOG(INFO) << "----------------------------------------------------------\n";
-    LOG(INFO) << "      ReadyForCreateProgress : "
-              << args->Status()->ReadyForCreateProgress() << "\n";
-    LOG(INFO) << "RecommendedForCreateProgress : "
-              << args->Status()->RecommendedForCreateProgress() << "\n";
-    LOG(INFO) << "                UserFeedback : "
-              << to_string(args->Status()->UserFeedback()) << "\n";
-  }
+  const float ready_for_create_progress =
+      args->Status()->ReadyForCreateProgress();
+  const float recommended_for_create_progress =
+      args->Status()->RecommendedForCreateProgress();
+  const std::string user_feedback =
+      to_string(args->Status()->UserFeedback());
+
+  feedback_callback_(ready_for_create_progress,
+                     recommended_for_create_progress,
+                     user_feedback);
+}
+
+void AzureSpatialAnchorsInterface::setCreateAnchorFeedbackCallback(
+    const CreateAnchorFeedbackCallbackFunction& callback) {
+      feedback_callback_ = callback;
 }
 
 std::string AzureSpatialAnchorsInterface::trimWhitespace(const std::string& s) {

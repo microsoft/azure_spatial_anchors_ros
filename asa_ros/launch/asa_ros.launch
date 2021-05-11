@@ -10,17 +10,11 @@
   <!-- Frame ID to use for found anchors. If set to blank, the UUID of the anchor will be used. -->
   <arg name="anchor_frame_id" default="" />
 
-  <!-- Whether to print verbose status updated on every ingested frame. Very spammy. -->
-  <arg name="print_status" default="false" />
-
   <!-- Use approximate time synchronization between the image and camera_info topic-->
   <arg name="use_approx_sync_policy" default="false"/>
 
   <!-- Que size of the image and camera_info subscriber -->
   <arg name="subscriber_queue_size" default="1"/>
-
-  <!-- If true the asa interface loggs Debug Messages and Errors to the screen -->
-  <arg name="activate_interface_level_logging" default="false"/>
 
   <!-- If true, query the last anchor id that was created from this machine. -->
   <arg name="query_last_anchor_id_from_cache" default="true"/>
@@ -42,10 +36,8 @@
 
     <param name="anchor_frame_id" value="$(arg anchor_frame_id)" />
 
-    <param name="print_status" value="$(arg print_status)" />
     <param name="use_approx_sync_policy" value="$(arg use_approx_sync_policy)"/>
     <param name="subscriber_queue_size" value="$(arg subscriber_queue_size)"/>
-    <param name="activate_interface_level_logging" value="$(arg activate_interface_level_logging)"/>
 
     <param name="query_last_anchor_id_from_cache" value="$(arg query_last_anchor_id_from_cache)"/>
 

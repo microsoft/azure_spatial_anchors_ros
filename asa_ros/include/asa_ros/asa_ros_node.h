@@ -16,6 +16,7 @@
 #include <asa_ros_msgs/CreatedAnchor.h>
 #include <asa_ros_msgs/FindAnchor.h>
 #include <asa_ros_msgs/FoundAnchor.h>
+#include <asa_ros_msgs/CreateAnchorFeedback.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
 #include <std_srvs/Empty.h>
@@ -49,6 +50,9 @@ class AsaRosNode {
                            const Eigen::Affine3d& anchor_in_world_frame);
   void anchorCreatedCallback(bool success, const std::string& anchor_id,
                              const std::string& reason);
+  void createAnchorFeedbackCallback(const float ready_for_create_progress,
+                                    const float recommended_for_create_progress,
+                                    const std::string& user_feedback);
 
   // Service callbacks.
   bool createAnchorCallback(asa_ros_msgs::CreateAnchorRequest& req,
@@ -92,6 +96,7 @@ class AsaRosNode {
   // Pubs & subs
   ros::Publisher found_anchor_pub_;
   ros::Publisher created_anchor_pub_;
+  ros::Publisher feedback_pub_;
   ros::Subscriber transform_sub_;
 
   // Services.
