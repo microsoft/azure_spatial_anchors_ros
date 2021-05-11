@@ -127,7 +127,7 @@ void AsaRosNode::initFromRosParams() {
     std::bind(&AsaRosNode::createAnchorFeedbackCallback, this,
               std::placeholders::_1, std::placeholders::_2,
               std::placeholders::_3));
-  if(activate_interface_level_logging){
+  if(activate_interface_level_logging_){
     interface_->ActivateInterfaceLevelLogging();
   }
   interface_->start();
