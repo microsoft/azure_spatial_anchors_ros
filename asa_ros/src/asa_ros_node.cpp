@@ -18,7 +18,8 @@ AsaRosNode::AsaRosNode(const ros::NodeHandle& nh,
       world_frame_id_("world"),
       camera_frame_id_(""),
       anchor_frame_id_(""),
-      tf_lookup_timeout_(0.1) {
+      tf_lookup_timeout_(0.1),
+      prev_frame_timestamp_(0.0) {
   initFromRosParams();
 }
 
@@ -144,6 +145,7 @@ void AsaRosNode::imageAndInfoCallback(
 
     // Finally and only in this case can we actually add the frame.
     interface_->addFrame(*image, *camera_info, transform);
+    prev_frame_timestamp_ = image->header.stamp;
     ROS_INFO_ONCE("Added first frame.");
   } else {
     ROS_WARN_STREAM("Couldn't look up transform from "
@@ -191,8 +193,34 @@ void AsaRosNode::anchorFoundCallback(
 
 bool AsaRosNode::createAnchorCallback(asa_ros_msgs::CreateAnchorRequest& req,
                                       asa_ros_msgs::CreateAnchorResponse& res) {
+  Eigen::Affine3d anchor_in_target_frame;
+  anchor_in_target_frame = tf2::transformToEigen(req.anchor_in_target_frame);
+
+  // Compute anchor in world frame if pose given relative to target frame
   Eigen::Affine3d anchor_in_world_frame;
-  anchor_in_world_frame = tf2::transformToEigen(req.anchor_in_world_frame);
+  if(req.target_frame.empty()) {
+    anchor_in_world_frame = anchor_in_target_frame;
+  }
+  else {
+    if (tf_buffer_.canTransform(world_frame_id_,
+                                req.target_frame,
+                                prev_frame_timestamp_,
+                                ros::Duration(tf_lookup_timeout_))) {
+
+      geometry_msgs::TransformStamped target_in_world_frame_tf =
+          tf_buffer_.lookupTransform(world_frame_id_,
+                                     req.target_frame,
+                                     prev_frame_timestamp_,
+                                     ros::Duration(tf_lookup_timeout_));
+      anchor_in_world_frame = tf2::transformToEigen(target_in_world_frame_tf) *
+                                  anchor_in_target_frame;
+    }
+    else {
+      ROS_WARN_STREAM("Failed to find target frame in TF tree. " <<
+                       "Anchor not created.");
+      return false;
+    }
+  }
 
   bool success = interface_->createAnchorWithCallback(
       anchor_in_world_frame,
@@ -201,6 +229,9 @@ bool AsaRosNode::createAnchorCallback(asa_ros_msgs::CreateAnchorRequest& req,
   // If there is not enough "spatial data" (different perspectives on the
   // scene), then anchor creation will fail immediately. This can be fixed by
   // getting more viewpoints.
+  // However, this returns true because it's not possible to pass an error
+  // message back to the process calling the service, so we just print an
+  // error if the create anchor call fails.
   return true;
 }
 

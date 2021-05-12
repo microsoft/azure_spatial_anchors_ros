@@ -115,6 +115,10 @@ class AsaRosNode {
   // will wait a full second on any failed attempt.
   double tf_lookup_timeout_;
 
+  // Timestamp of most recent processed frame. Used when looking up the
+  // transform to the target frame during anchor creation.
+  ros::Time prev_frame_timestamp_;
+
   // A flag indicating that the node will use an approximate time synchronization  
   // policy to synchronize the images with the camera_info messages instead of the 
   // exact synchronizer
