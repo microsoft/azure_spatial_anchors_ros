@@ -55,7 +55,7 @@ void AsaRosNode::initFromRosParams() {
                                  last_anchor_cache_path_,
                                  last_anchor_cache_path_default);
 
-  if(queue_size_ > 1 || use_approx_sync_policy_) {
+  if(use_approx_sync_policy_) {
     ROS_INFO_STREAM("Starting image and info subscribers with approximate " <<
                     "time sync, where queue size is " << queue_size_);
   }
@@ -302,9 +302,9 @@ std::string AsaRosNode::readCachedAnchorId() {
   // Try to read cache file
   std::ifstream cache_file(last_anchor_cache_path_.c_str());
   if(cache_file) {
-    std::ostringstream ss;
-    ss << cache_file.rdbuf();
-    cached_anchor_id = ss.str();
+    std::ostringstream string_stream;
+    string_stream << cache_file.rdbuf();
+    cached_anchor_id = string_stream.str();
     ROS_INFO_STREAM("Read anchor id: " << cached_anchor_id << " from cache");
   }
   else {
