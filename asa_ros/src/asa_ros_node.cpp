@@ -1,3 +1,7 @@
+#include <cstdlib>
+#include <fstream>
+#include <sstream>
+
 #include <glog/logging.h>
 
 #include <cv_bridge/cv_bridge.h>
@@ -28,20 +32,41 @@ AsaRosNode::~AsaRosNode() {}
 
 void AsaRosNode::initFromRosParams() {
 
-  nh_private_.param("subscriber_queue_size", queue_size, 1);
-  nh_private_.param("use_approx_sync_policy", use_approx_sync_policy, false);
-  nh_private_.param("activate_interface_level_logging", activate_interface_level_logging, false);
+  nh_private_.param("subscriber_queue_size", queue_size_, 1);
+  nh_private_.param("use_approx_sync_policy", use_approx_sync_policy_, false);
+  nh_private_.param("activate_interface_level_logging",
+                    activate_interface_level_logging_,
+                    false);
+  nh_private_.param("query_last_anchor_id_from_cache",
+                    query_last_anchor_id_from_cache_,
+                    false);
 
-  if(queue_size > 1 || use_approx_sync_policy) {
-    ROS_INFO_STREAM("Starting image and info subscribers with approximate time sync, where que-size is " << queue_size);
+  // Set anchor id cache path
+  std::string last_anchor_cache_path_default;
+  // $HOME should be defined, but if not, put it in /tmp
+  const char *home_path = getenv("HOME");
+  if(home_path) {
+    last_anchor_cache_path_default = std::string(home_path) +
+                                     "/.ros/last_anchor_id";
+  }
+  else {
+    last_anchor_cache_path_default = "/tmp/last_anchor_id";
+  }
+  nh_private_.param<std::string>("last_anchor_cache_path",
+                                 last_anchor_cache_path_,
+                                 last_anchor_cache_path_default);
+
+  if(use_approx_sync_policy_) {
+    ROS_INFO_STREAM("Starting image and info subscribers with approximate " <<
+                    "time sync, where queue size is " << queue_size_);
   }
 
   // Subscribe to the camera images.
-  image_sub_.subscribe(nh_, "image", queue_size);
-  info_sub_.subscribe(nh_, "camera_info", queue_size);
+  image_sub_.subscribe(nh_, "image", queue_size_);
+  info_sub_.subscribe(nh_, "camera_info", queue_size_);
   
-  if(use_approx_sync_policy) {
-    image_info_approx_sync_.reset(new message_filters::Synchronizer<CameraSyncPolicy>(CameraSyncPolicy(queue_size), image_sub_, info_sub_));
+  if(use_approx_sync_policy_) {
+    image_info_approx_sync_.reset(new message_filters::Synchronizer<CameraSyncPolicy>(CameraSyncPolicy(queue_size_), image_sub_, info_sub_));
     image_info_approx_sync_->registerCallback(boost::bind(&AsaRosNode::imageAndInfoCallback, this, _1, _2));
   } else {
     image_info_sync_.reset(
@@ -103,7 +128,7 @@ void AsaRosNode::initFromRosParams() {
     std::bind(&AsaRosNode::createAnchorFeedbackCallback, this,
               std::placeholders::_1, std::placeholders::_2,
               std::placeholders::_3));
-  if(activate_interface_level_logging){
+  if(activate_interface_level_logging_){
     interface_->ActivateInterfaceLevelLogging();
   }
   interface_->start();
@@ -114,6 +139,14 @@ void AsaRosNode::initFromRosParams() {
     // Start looking for an anchor immediately if one is given as a param.
     interface_->queryAnchorWithCallback(
         anchor_id, std::bind(&AsaRosNode::anchorFoundCallback, this,
+                             std::placeholders::_1, std::placeholders::_2));
+  }
+  else if(query_last_anchor_id_from_cache_) {
+    // Or look for the last created anchor if this flag is set
+    const std::string cached_anchor_id = readCachedAnchorId();
+    ROS_INFO_STREAM("Querying cached anchor id: " << cached_anchor_id);
+    interface_->queryAnchorWithCallback(
+        cached_anchor_id, std::bind(&AsaRosNode::anchorFoundCallback, this,
                              std::placeholders::_1, std::placeholders::_2));
   }
 }
@@ -255,6 +288,9 @@ void AsaRosNode::anchorCreatedCallback(bool success,
     ROS_WARN_STREAM("Unable to create anchor. Reason: " << reason);
   }
   created_anchor_pub_.publish(anchor_msg);
+  if(storeAnchorIdInCache(anchor_id)) {
+    ROS_INFO_STREAM("Stored anchor id in cache.");
+  }
 }
 
 bool AsaRosNode::queryAnchors(const std::string& anchor_ids) {
@@ -289,6 +325,39 @@ void AsaRosNode::createAnchorTimerCallback(const ros::TimerEvent& e) {
   Eigen::Affine3d anchor_in_world_frame = Eigen::Affine3d::Identity();
   interface_->createAnchor(anchor_in_world_frame, &id);
   ROS_INFO_STREAM("Created an anchor with ID: " << id);
+}
+
+std::string AsaRosNode::readCachedAnchorId() {
+  std::string cached_anchor_id;
+
+  // Try to read cache file
+  std::ifstream cache_file(last_anchor_cache_path_.c_str());
+  if(cache_file) {
+    std::ostringstream string_stream;
+    string_stream << cache_file.rdbuf();
+    cached_anchor_id = string_stream.str();
+    ROS_INFO_STREAM("Read anchor id: " << cached_anchor_id << " from cache");
+  }
+  else {
+    ROS_ERROR_STREAM("Could not read from anchor id cache file: " <<
+                      last_anchor_cache_path_);
+  }
+
+  return cached_anchor_id;
+}
+
+bool AsaRosNode::storeAnchorIdInCache(const std::string& created_anchor_id) {
+  std::ofstream cache_file(last_anchor_cache_path_.c_str());
+  if(cache_file) {
+    cache_file << created_anchor_id;
+    cache_file.close();
+    return true;
+  }
+  else {
+    ROS_ERROR_STREAM("Could not open anchor cache file for writing: " <<
+                     last_anchor_cache_path_);
+    return false;
+  }
 }
 
 // Does a "soft" reset: continues to try to find any anchors that are

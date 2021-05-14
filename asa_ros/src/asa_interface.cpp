@@ -511,7 +511,7 @@ void AzureSpatialAnchorsInterface::ActivateInterfaceLevelLogging(){
   
   session_->LogLevel(Microsoft::Azure::SpatialAnchors::SessionLogLevel::All);
   session_->Diagnostics()->LogLevel(Microsoft::Azure::SpatialAnchors::SessionLogLevel::All);
-  session_->Diagnostics()->LogDirectory("/home/mrdrone/");
+  session_->Diagnostics()->LogDirectory("/tmp");
   LOG(INFO) << "Diagnostics LogDirectory: " << session_->Diagnostics()->LogDirectory();
   LOG(INFO) << "Diagnostics LogLevel: " << (int32_t)session_->Diagnostics()->LogLevel();
   LOG(INFO) << "Session LogLevel: " << (int32_t)session_->LogLevel();

@@ -72,6 +72,13 @@ class AsaRosNode {
   // Timer callbacks.
   void createAnchorTimerCallback(const ros::TimerEvent& e);
 
+  // Functions to read and write anchor ids from files for caching
+  // Automatically stores last created anchor to $ROS_HOME/last_anchor_id
+  // If query_last_anchor_id_from_cache param is true, then the node
+  // reads the id from this file and queries for that one.
+  std::string readCachedAnchorId();
+  bool storeAnchorIdInCache(const std::string& created_anchor_id);
+
   // Nodehandles, publishers, subscribers.
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;
@@ -122,13 +129,20 @@ class AsaRosNode {
   // A flag indicating that the node will use an approximate time synchronization  
   // policy to synchronize the images with the camera_info messages instead of the 
   // exact synchronizer
-  bool use_approx_sync_policy;
+  bool use_approx_sync_policy_;
 
   // The queue size of the subscribers used for the image and camera_info topic
-  int queue_size;
+  int queue_size_;
 
   // A flag that tells the asa interface to log debug logs
-  bool activate_interface_level_logging;
+  bool activate_interface_level_logging_;
+
+  // Flag to select whether to query the last anchor that was created and read
+  // the anchor id from a cache file, or to manually provide one.
+  bool query_last_anchor_id_from_cache_;
+
+  // Path to anchor id cache.  Defaults to ~/.ros/last_anchor_id
+  std::string last_anchor_cache_path_;
 
   // Cache of which anchors are currently being queried. This will be only used
   // when reset() (but not resetCompletely() is called, to restart any
