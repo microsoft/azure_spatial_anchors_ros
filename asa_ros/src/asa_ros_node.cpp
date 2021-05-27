@@ -23,7 +23,7 @@ AsaRosNode::AsaRosNode(const ros::NodeHandle& nh,
       camera_frame_id_(""),
       anchor_frame_id_(""),
       tf_lookup_timeout_(0.1),
-      prev_frame_timestamp_(0.0) {
+      prev_frame_timestamp_() {
   initFromRosParams();
 }
 
@@ -235,6 +235,11 @@ bool AsaRosNode::createAnchorCallback(asa_ros_msgs::CreateAnchorRequest& req,
     anchor_in_world_frame = anchor_in_target_frame;
   }
   else {
+    if (prev_frame_timestamp_ == ros::Time(0))
+    {
+      ROS_WARN_STREAM("Failed to create anchor: no frames have been added.");
+      return false;
+    }
     if (tf_buffer_.canTransform(world_frame_id_,
                                 req.target_frame,
                                 prev_frame_timestamp_,
