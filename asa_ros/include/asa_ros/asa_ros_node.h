@@ -118,6 +118,9 @@ class AsaRosNode {
   std::string camera_frame_id_;
   std::string anchor_frame_id_;
 
+  // A flag indicating if the node will send the anchor transforms to the tf tree. Default is true.
+  bool broadcast_anchor_tf_;
+
   // Timeout to wait for TF messages, in seconds. 0.0 = instantaneous. 1.0 =
   // will wait a full second on any failed attempt.
   double tf_lookup_timeout_;

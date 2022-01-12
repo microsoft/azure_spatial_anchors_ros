@@ -22,6 +22,7 @@ AsaRosNode::AsaRosNode(const ros::NodeHandle& nh,
       world_frame_id_("world"),
       camera_frame_id_(""),
       anchor_frame_id_(""),
+      broadcast_anchor_tf_(true),
       tf_lookup_timeout_(0.1),
       prev_frame_timestamp_() {
   initFromRosParams();
@@ -102,6 +103,7 @@ void AsaRosNode::initFromRosParams() {
   nh_private_.param("world_frame_id", world_frame_id_, world_frame_id_);
   nh_private_.param("camera_frame_id", camera_frame_id_, camera_frame_id_);
   nh_private_.param("anchor_frame_id", anchor_frame_id_, anchor_frame_id_);
+  nh_private_.param("broadcast_anchor_tf", broadcast_anchor_tf_, broadcast_anchor_tf_);
   nh_private_.param("tf_lookup_timeout", tf_lookup_timeout_,
                     tf_lookup_timeout_);
 
@@ -214,7 +216,9 @@ void AsaRosNode::anchorFoundCallback(
     T_W_A_msg.child_frame_id = anchor_id;
   }
 
-  tf_broadcaster_.sendTransform(T_W_A_msg);
+  if (broadcast_anchor_tf_) {
+    tf_broadcaster_.sendTransform(T_W_A_msg);
+  }
 
   // Also publish this as a topic.
   asa_ros_msgs::FoundAnchor anchor_msg;
