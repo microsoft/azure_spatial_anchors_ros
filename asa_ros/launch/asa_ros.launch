@@ -29,8 +29,6 @@
     <param name="camera_frame_id" value="camera_fisheye1_optical_frame" />
     <!-- Timeout to wait for TF lookups to finish. If you get a lot of TF errors but still smome valid lookups, try increasing this. -->
     <param name="tf_lookup_timeout" value="0.1" />
-    <!-- A flag indicating if the node will send the anchor transforms to the tf tree when an anchor is found. Default is true. -->
-    <param name="broadcast_anchor_tf" value="true" />
     
     <param name="account_id" value="$(arg account_id)"/>
     <param name="account_key" value="$(arg account_key)"/>
