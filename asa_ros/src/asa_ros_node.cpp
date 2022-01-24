@@ -279,7 +279,18 @@ bool AsaRosNode::createAnchorCallback(asa_ros_msgs::CreateAnchorRequest& req,
 
 bool AsaRosNode::findAnchorCallback(asa_ros_msgs::FindAnchorRequest& req,
                                     asa_ros_msgs::FindAnchorResponse& res) {
-  queryAnchors(req.anchor_id);
+  // anchor_id is deprecated but still supported for now
+  // if the client leaves it empty, use the new vector member instead
+  if (req.anchor_id.empty()) {
+    queryAnchors(convertIdVectorToString(req.anchor_ids));
+  }
+  else {
+    ROS_WARN_ONCE("The anchor_id member of FindAnchor.srv is deprecated and will be "
+                  "removed in a future release. Use the anchor_ids vector member instead.");
+    
+    queryAnchors(req.anchor_id);
+  }
+                                      
   return true;
 }
 
@@ -300,6 +311,25 @@ void AsaRosNode::anchorCreatedCallback(bool success,
   if(storeAnchorIdInCache(anchor_id)) {
     ROS_INFO_STREAM("Stored anchor id in cache.");
   }
+}
+
+std::string AsaRosNode::convertIdVectorToString(const std::vector<std::string>& vec) const
+{  
+  std::stringstream output;
+  
+  const size_t last_index = vec.size() - 1;
+  const char separator = ',';
+  
+  for (int i = 0; i < vec.size(); ++i) {
+    output << vec.at(i);
+    
+    // if this is not the last element, add the separator
+    if (i != last_index) {
+      output << separator;
+    }
+  }
+  
+  return output.str();
 }
 
 bool AsaRosNode::queryAnchors(const std::string& anchor_ids) {

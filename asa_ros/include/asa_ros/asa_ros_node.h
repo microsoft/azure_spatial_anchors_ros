@@ -62,6 +62,11 @@ class AsaRosNode {
   bool resetCallback(std_srvs::EmptyRequest& req, std_srvs::EmptyResponse& res);
   bool resetCompletelyCallback(std_srvs::EmptyRequest& req,
                                std_srvs::EmptyResponse& res);
+  
+  // Helper function which converts a vector of IDs into a
+  // single comma-separated string, of the sort expected by
+  // AsaRosNode::queryAnchors()
+  std::string convertIdVectorToString(const std::vector<std::string>& vec) const;
 
   // Wrappers for commonly-used calls to the interface.
   // Queries COMMA-SEPARATED list of anchor IDs, and caches them in case the
