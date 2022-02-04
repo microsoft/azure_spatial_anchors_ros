@@ -2,5 +2,9 @@
 # created on the same Azure Spatial Anchors account as used in this ROS node.
 # Found anchors will be published on the /found_anchor topic.
 # Note that you can be searching for multiple anchors at once.
+string[] anchor_ids
+
+# DEPRECATED: The anchor_id member is deprecated and will be removed in a future release.
+#             Use the anchor_ids vector member instead.
 string anchor_id
 ---

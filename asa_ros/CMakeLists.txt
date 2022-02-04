@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(asa_ros)
 
+# Deprecation Warning
+message(DEPRECATION "The anchor_id member of FindAnchor.srv is deprecated and will be \
+removed in a future release. Use the anchor_ids vector member instead.")
+
 add_definitions(-std=c++1z)
 
 find_package(catkin_simple REQUIRED)
