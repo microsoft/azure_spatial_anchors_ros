@@ -30,18 +30,17 @@ find_package(AzureSpatialAnchors REQUIRED)
 #############
 # LIBRARIES #
 #############
-add_library(${PROJECT_NAME}
+cs_add_library(${PROJECT_NAME}
   src/asa_interface.cpp
   src/asa_ros_provider.cpp
   src/asa_bag_reader.cpp
   src/internal/asa_helper.cpp
 )
 target_link_libraries(${PROJECT_NAME}
-    PRIVATE AzureSpatialAnchors::AzureSpatialAnchors
-    PUBLIC Eigen3::Eigen
-    PUBLIC ${GLOG_LIBRARIES}
-    PUBLIC ${Gflags_LIBRARIES}
-    PUBLIC ${catkin_LIBRARIES}
+    AzureSpatialAnchors::AzureSpatialAnchors
+    Eigen3::Eigen
+    ${GLOG_LIBRARIES}
+    ${Gflags_LIBRARIES}
 )
 
 ############
