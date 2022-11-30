@@ -11,7 +11,7 @@ The hands-on video walkthroughs for the demos are available on the MSR YouTube c
 - [Demo 2: Colocalization](https://youtu.be/P11LcMOp2CE) (the demo that goes with this repo and is described in the [wiki](https://github.com/microsoft/azure_spatial_anchors_ros/wiki/Demo))
 
 You can sign up to get access to the Azure Spatial Anchors Linux SDK here: [aka.ms/ASALinuxSDKSignup](http://aka.ms/ASALinuxSDKSignup).
-**This is REQUIRED to use this repo.** It may take us up to 2 business days to add you. This requires an [Azure Devops account](https://azure.microsoft.com/en-us/services/devops/).
+**This is REQUIRED to use this repo.** It may take us up to 2 business days to add you. 
 
 You should have an Azure Spatial Anchors account in Azure to use this SDK and wrapper.
 Please see instructions for the [ASA Quickstarts](https://docs.microsoft.com/en-us/azure/spatial-anchors/quickstarts/get-started-unity-hololens) to create one. Keep the Account ID, and Account Key, and Account Domain nearby. This is free up to 10k queries/month.
@@ -20,7 +20,6 @@ Please see instructions for the [ASA Quickstarts](https://docs.microsoft.com/en-
 - Ubuntu 18.04/20.04
 - ROS melodic or noetic
 - [Azure Portal](https://portal.azure.com/) account with an Azure Spatial Anchors resource.
-- [Azure Devops account](https://azure.microsoft.com/en-us/services/devops/) account.
 - [Signed up for Azure Spatial Anchors Linux SDK](http://aka.ms/ASALinuxSDKSignup), which may take 1-2 days.
 
 # Input data requirements
